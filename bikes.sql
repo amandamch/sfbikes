@@ -224,3 +224,4 @@ SELECT CAST(SUBSTR(date, 1, 2) AS int) AS month, COUNT(events) AS rainy_days FRO
 
 -- There are lots more explorations that can be made in terms of weather specifics, as well as variation by city and by zipcode. We're somewhat limited by the lack of a rider id, but that makes sense for data privacy to not have that freely accessible!
 -- What we do have is bike_id, and we could make a map of individual bikes' journeys around San Francisco, which could be a great illustration of individual bike mileage (theoretically this could be useful for automating a maintenance system)
+-- We could also in future look at the most popular routes for customers and subscribers (by counting start and end station pairs in the trip table), or how weekdays vs weekends affect journey times. 
