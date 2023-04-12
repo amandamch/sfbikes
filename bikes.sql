@@ -38,7 +38,7 @@ SELECT COUNT(trip.start_station_id), station.name, station.dock_count FROM trip
     JOIN station ON trip.start_station_id=station.id 
     GROUP BY trip.start_station_id
     ORDER BY COUNT(trip.start_station_id) DESC LIMIT 5;
--- So our top stations are San Franciscio Caltrain (Townsend at 4th) (49,092), San Franciscio Caltrain 2 (330 Townsend) (33,742), Harry Bridges Plaza (Ferry Building) (32,394), Embarcadero at Sansome (27,713), and Temporary Transbay Terminal (Howard at Beale) (26,089)
+-- So our top stations are San Francisco Caltrain (Townsend at 4th) (49,092), San Francisco Caltrain 2 (330 Townsend) (33,742), Harry Bridges Plaza (Ferry Building) (32,394), Embarcadero at Sansome (27,713), and Temporary Transbay Terminal (Howard at Beale) (26,089)
 -- We can see that there's a pretty big drop off after the top station, and then after the second and third as well
 -- By ranking, the number of docks: 1st (19), 2nd (23), 3rd (23), 4th (15), 5th (23)
 
