@@ -197,7 +197,10 @@ SELECT CAST(SUBSTR(trip.start_date, 1, 2) AS int) AS month, COUNT(trip.start_dat
 SELECT CAST(SUBSTR(trip.start_date, 1, 2) AS int) AS month, AVG(weather.max_temperature_f) FROM trip
     JOIN weather ON weather.date = SUBSTR(trip.start_date, INSTR(trip.start_date, ' '), - 10)
     GROUP BY month;
-
+-- Alternatively:
+SELECT CAST(SUBSTR(date, 1, 2) AS int) AS month, AVG(max_temperature_f) FROM weather
+    GROUP BY month;
+    
 -- Out of interest, it might be useful to see whether subscription type varies alongside this; this is also worth graphing in presentation
 SELECT CAST(SUBSTR(start_date, 1, 2) AS int) AS month, subscription_type, COUNT(subscription_type) FROM trip
     GROUP BY month, subscription_type;
@@ -225,3 +228,12 @@ SELECT CAST(SUBSTR(date, 1, 2) AS int) AS month, COUNT(events) AS rainy_days FRO
 -- There are lots more explorations that can be made in terms of weather specifics, as well as variation by city and by zipcode. We're somewhat limited by the lack of a rider id, but that makes sense for data privacy to not have that freely accessible!
 -- What we do have is bike_id, and we could make a map of individual bikes' journeys around San Francisco, which could be a great illustration of individual bike mileage (theoretically this could be useful for automating a maintenance system)
 -- We could also in future look at the most popular routes for customers and subscribers (by counting start and end station pairs in the trip table), or how weekdays vs weekends affect journey times. 
+
+-- Additional queries I wanted to make when I started thinking about presenting information in graphs:
+-- Difference in journeys by customers vs subscribers by year: was there any growth and where?
+SELECT SUBSTR(start_date, INSTR(start_date, ' '), -4) AS year, COUNT(id), subscription_type FROM trip
+    GROUP BY year, subscription_type;
+
+-- Number of trips made in each hour of the day, split by year (to present 3 bars per hour)
+SELECT SUBSTR(start_date, INSTR(start_date, ' '), -4) AS year, CAST(SUBSTR(start_date, -3, -2) AS int) AS start_time, COUNT(start_date) FROM trip
+    GROUP BY year, start_time;
