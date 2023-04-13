@@ -3,3 +3,4 @@ status.csv
 trip.csv
 weather.csv
 /venv
+/model
