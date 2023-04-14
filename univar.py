@@ -1,6 +1,6 @@
 # Starting with a univariate time series analysis, just using the trip data to see if we can predict how many trips will occur by date
 # This is quite a nice one as it's dealing with integers for trips etc.
-import tensorflow as tf
+import tensorflow
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -42,7 +42,7 @@ def df_to_X_y (df, window_size):
         y.append(df_as_np[i+window_size]) # Add day after window to y vector
     return np.array(X), np.array(y)
 
-WINDOW_SIZE = 7 # Hard coding this here just because it's an important value that is worth keeping as a constant
+WINDOW_SIZE = 5 # Hard coding this here just because it's an important value that is worth keeping as a constant
 
 X, y = df_to_X_y(trip_count, WINDOW_SIZE)
 
@@ -64,7 +64,7 @@ from tensorflow.keras.optimizers import Adam # Faster and fewer parameters neede
 from tensorflow.keras.models import load_model
 
 model = Sequential()
-model.add(InputLayer((7, 1)))
+model.add(InputLayer((WINDOW_SIZE, 1)))
 model.add(LSTM(64)) # Doing an LSTM because that's good at picking up long-term dependencies, and since we're looking at seasonal or yearly trends, that's a good call
 model.add(Dense(8, 'relu')) # ReLU over sigmoid/tanh as it doesn't have the same sensitivity issues and large values don't snap to each end of the scale; also just the most common activation function
 model.add(Dense(1, 'linear')) # Trying to predict a linear value
@@ -75,7 +75,7 @@ model.add(Dense(1, 'linear')) # Trying to predict a linear value
 cp = ModelCheckpoint('model/', save_best_only=True)
 model.compile(loss=MeanSquaredError(), optimizer=Adam(), metrics=[RootMeanSquaredError()]) # Adam learning rate default is 0.001
 
-model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, callbacks=[cp]) # Easy rule of thumb for epochs is 3 * no. columns, so 10 is fine for univariate LSTM
+model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=1000, callbacks=[cp]) # Easy rule of thumb for epochs is 3 * no. columns, so 10 is fine for univariate LSTM
 
 # Ok, so the output here is not good. Perhaps bike trips are not as predictable as we thought? Or perhaps the date simply is not enough information to fit a model for use (this makes sense really)
 model = load_model('model')
@@ -84,8 +84,20 @@ train_predictions = model.predict(X_train).flatten() # Readable matrix of predic
 train_results = pd.DataFrame(data={'Train Predictions':train_predictions, 'Actual Values':y_train})
 print(train_results)
 # Ok, so something has definitely gone wrong here. All the training predictions are around super low, so we need to unpack why that's so different from the actual values, since it seems that the minimum number of trips is in the hundreds
-# Below is a list of model tweaks:
+# loss: 893185.8125 - root_mean_squared_error: 945.0851 - val_loss: 1178963.3750 - val_root_mean_squared_error: 1085.8008
+# Below is a list of model tweaks that we can do:
+# Altering window size
+# Window size as 6: loss: 887147.3125 - root_mean_squared_error: 941.8849 - val_loss: 1177575.5000 - val_root_mean_squared_error: 1085.1615 (marginal improvement)
+# Window size as 5: loss: 918391.3750 - root_mean_squared_error: 958.3274 - val_loss: 1213552.3750 - val_root_mean_squared_error: 1101.6135 (not as good but lower validation mse)
+# Altering learning rate using our window size of 6, to 0.0001 Effect: loss: 933586.3125 - root_mean_squared_error: 966.2227 - val_loss: 1234065.5000 - val_root_mean_squared_error: 1110.8850 (not really improving)
+# Changing number of epochs:
+# 20 epochs: loss: 705208.3125 - root_mean_squared_error: 839.7668 - val_loss: 953453.1250 - val_root_mean_squared_error: 976.4492 (huge improvement relative to where we were)
+# 50 epochs: loss: 218783.0625 - root_mean_squared_error: 467.7425 - val_loss: 342586.1250 - val_root_mean_squared_error: 585.3086 (big improvement but we're still in the hundreds of thousands for loss)
+# However with 50 epochs the predicted and actual lines intersect
+# We'll be really bold and try 1000 epochs, then leave it there for a debrief on what kind of issues a model like this has, and why LSTM might not be the most appropriate here
+# loss: 32198.1719 - root_mean_squared_error: 179.4385 - val_loss: 44117.5508 - val_root_mean_squared_error: 210.0418
+# We can then try another univariate analysis with the weather, and also with the number of trips grouped by hour as well as date, and then try a multivariate analysis using all the weather data
 
-#plt.plot(train_results['Train Predictions'])
-#plt.plot(train_results['Actual Values'])
-#plt.show()
+plt.plot(train_results['Train Predictions'])
+plt.plot(train_results['Actual Values'])
+plt.show()
