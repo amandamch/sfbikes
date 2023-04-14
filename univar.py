@@ -42,7 +42,7 @@ def df_to_X_y (df, window_size):
         y.append(df_as_np[i+window_size]) # Add day after window to y vector
     return np.array(X), np.array(y)
 
-WINDOW_SIZE = 5 # Hard coding this here just because it's an important value that is worth keeping as a constant
+WINDOW_SIZE = 6 # Hard coding this here just because it's an important value that is worth keeping as a constant
 
 X, y = df_to_X_y(trip_count, WINDOW_SIZE)
 
@@ -95,7 +95,8 @@ print(train_results)
 # 50 epochs: loss: 218783.0625 - root_mean_squared_error: 467.7425 - val_loss: 342586.1250 - val_root_mean_squared_error: 585.3086 (big improvement but we're still in the hundreds of thousands for loss)
 # However with 50 epochs the predicted and actual lines intersect
 # We'll be really bold and try 1000 epochs, then leave it there for a debrief on what kind of issues a model like this has, and why LSTM might not be the most appropriate here
-# loss: 32198.1719 - root_mean_squared_error: 179.4385 - val_loss: 44117.5508 - val_root_mean_squared_error: 210.0418
+# Window size 6: loss: 30087.4453 - root_mean_squared_error: 173.4573 - val_loss: 30938.0215 - val_root_mean_squared_error: 175.892 (this was in the end better than 5 still)
+
 # We can then try another univariate analysis with the weather, and also with the number of trips grouped by hour as well as date, and then try a multivariate analysis using all the weather data
 
 plt.plot(train_results['Train Predictions'])
